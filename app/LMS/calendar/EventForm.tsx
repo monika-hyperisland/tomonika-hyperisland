@@ -184,6 +184,10 @@ export const EventForm = ({
     setFormError(undefined);
     setFieldErrors({});
 
+    // A teacher's event is always for everyone. The draft is shared with
+    // student view, so a restored "People I pick" with nobody picked must
+    // not reach the server, where it fails validation on a hidden field.
+    const audience = isTeacher ? defaultVisibility(true) : visibility;
     const input: CalendarEventInput = {
       title,
       category,
@@ -193,8 +197,8 @@ export const EventForm = ({
       endTime: normalizeTime(endTime),
       link,
       description,
-      visibility,
-      sharedWith: visibility === "shared" ? [...sharedWith] : [],
+      visibility: audience,
+      sharedWith: audience === "shared" ? [...sharedWith] : [],
       repeatWeeklyUntil: editing ? "" : repeatUntil,
     };
 
