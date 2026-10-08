@@ -1,11 +1,10 @@
 import { config } from "dotenv";
 import { faker } from "@faker-js/faker";
 
-import { User } from "../app/models/user.ts";
-import { Guide } from "../app/models/guide.ts";
-import { Return } from "../app/models/return.ts";
-import { Review, Vote } from "../app/models/review.ts";
-
+import { User } from "../app/models/user";
+import { Guide } from "../app/models/guide";
+import { Return } from "../app/models/return";
+import { Review, Vote } from "../app/models/review";
 // Load environment variables from .env.local
 config({ path: ".env.local" });
 
@@ -212,7 +211,7 @@ async function seedData({
    * has been loaded.
    */
   const { connectToDatabase } = await import(
-    "../app/serverActions/mongoose-connector.ts"
+    "../app/serverActions/mongoose-connector"
   );
 
   await connectToDatabase();
