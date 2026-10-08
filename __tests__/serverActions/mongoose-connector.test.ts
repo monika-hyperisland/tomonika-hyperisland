@@ -50,6 +50,18 @@ describe("connectToDatabase", () => {
     expect(connect).toHaveBeenCalledTimes(1);
   });
 
+  it("reuses an already active connection even if the module cache was reset", async () => {
+    const connectToDatabase = await freshConnector();
+    await connectToDatabase();
+
+    connection.readyState = CONNECTED;
+    delete (globalThis as Record<string, unknown>)._mongooseCache;
+
+    const nextConnect = await freshConnector();
+    await expect(nextConnect()).resolves.toBeDefined();
+    expect(connect).toHaveBeenCalledTimes(1);
+  });
+
   it("reconnects when the cached connection has dropped", async () => {
     const connectToDatabase = await freshConnector();
     await connectToDatabase();
