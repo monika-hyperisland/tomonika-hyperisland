@@ -126,7 +126,7 @@ export const GallerySearch = styled.input`
 
 export const SearchWrapper = styled.div`
   position: relative;
-  max-width: 400px;
+  max-width: 800px;
   margin-bottom: 24px;
 
   svg {
