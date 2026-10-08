@@ -109,6 +109,36 @@ export const GalleryGrid = styled.div`
   margin: 0;
 `;
 
+export const GallerySearch = styled.input`
+  padding: 12px 16px 12px 38px;
+  width: 100%;
+  border: 1px solid var(--primary-black-30);
+  border-radius: var(--radius-lg);
+  font-family: "Source Sans 3", sans-serif;
+  font-size: var(--text-base);
+
+  &:focus {
+    outline: none;
+    border-color: var(--theme-module3-100);
+    box-shadow: 0 0 0 3px var(--theme-module3-60);
+  }
+`;
+
+export const SearchWrapper = styled.div`
+  position: relative;
+  max-width: 400px;
+  margin-bottom: 24px;
+
+  svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-black-60);
+    pointer-events: none;
+  }
+`;
+
 export const GalleryEmpty = styled.div`
   display: flex;
   flex-direction: column;
