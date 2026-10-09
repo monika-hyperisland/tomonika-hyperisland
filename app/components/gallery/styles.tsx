@@ -139,6 +139,46 @@ export const SearchWrapper = styled.div`
   }
 `;
 
+export const FilterControls = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 960px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+`;
+
+export const FilterSelect = styled.select`
+  width: 100%;
+  padding: 12px 44px 12px 14px;
+  border: 1px solid var(--primary-black-30);
+  border-radius: var(--radius-lg);
+  background-color: var(--primary-white);
+  /* Custom arrow lets us control exact right spacing across browsers. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 12px 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color: var(--primary-black-100);
+  font-family: "Source Sans 3", sans-serif;
+  font-size: var(--text-base);
+
+  &:focus {
+    outline: none;
+    border-color: var(--theme-module3-100);
+    box-shadow: 0 0 0 3px var(--theme-module3-60);
+  }
+`;
+
 export const GalleryEmpty = styled.div`
   display: flex;
   flex-direction: column;

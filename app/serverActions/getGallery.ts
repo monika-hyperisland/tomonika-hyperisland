@@ -33,6 +33,7 @@ export type GalleryItem = {
   returnImage: string | null;
   returnGif: string | null;
   returnUrl: string | null;
+  createdAt: string;
 };
 
 const buildPipeline = (limit?: number): PipelineStage[] => {
@@ -145,6 +146,7 @@ const mapAggregateToItem = (doc: GalleryAggregateResult): GalleryItem => {
     returnImage: image,
     returnGif: gif,
     returnUrl: doc.liveVersion ?? doc.projectUrl ?? null,
+    createdAt: doc.createdAt.toISOString(),
   };
 };
 
