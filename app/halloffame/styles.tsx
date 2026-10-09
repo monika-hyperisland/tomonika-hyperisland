@@ -14,7 +14,7 @@ export const PageContainer = styled.div`
 
 export const PageHeader = styled.div`
   text-align: left;
-  margin-bottom: 48px;
+  margin-bottom: 28px;
 `;
 
 export const PageTitle = styled.h1`

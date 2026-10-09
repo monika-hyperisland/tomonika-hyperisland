@@ -2,13 +2,16 @@
 
 import type { GalleryItem as GalleryItemType } from "app/serverActions/getGallery";
 import GalleryItem from "./GalleryItem";
-import { GalleryGrid, GalleryEmpty } from "./styles";
+import { GalleryGrid, GalleryEmpty, GallerySearch, SearchWrapper } from "./styles";
+import { useState } from "react";
+import { FiSearch } from "react-icons/fi";
 
 interface GalleryProps {
   items: GalleryItemType[];
 }
 
 const Gallery = ({ items }: GalleryProps) => {
+  const [query, setQuery] = useState("");
   if (!items || items.length === 0) {
     return (
       <GalleryEmpty>
@@ -18,12 +21,37 @@ const Gallery = ({ items }: GalleryProps) => {
     );
   }
 
+  const search = query.trim().toLocaleLowerCase();
+  const filteredItems = items.filter((item) =>
+    item.title.toLocaleLowerCase().includes(search) ||
+    item.studentName.toLocaleLowerCase().includes(search) ||
+    item.module.title.toLocaleLowerCase().includes(search)
+  );
+
   return (
-    <GalleryGrid>
-      {items.map((item) => (
-        <GalleryItem key={item.returnId} item={item} />
-      ))}
-    </GalleryGrid>
+    <>
+      <SearchWrapper>
+        <FiSearch size={18} aria-hidden="true" />
+        <GallerySearch
+          type="search"
+          placeholder="Search by project, student or module"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </SearchWrapper>
+
+      {filteredItems.length === 0 ? (
+        <GalleryEmpty>
+          <p>No projects match "{query}"</p>
+        </GalleryEmpty>
+      ) : (
+        <GalleryGrid>
+          {filteredItems.map((item) => (
+            <GalleryItem key={item.returnId} item={item} />
+          ))}
+        </GalleryGrid>
+      )}
+    </>
   );
 };
 
