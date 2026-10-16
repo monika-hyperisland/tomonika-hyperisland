@@ -66,6 +66,8 @@ const buildPipeline = (limit?: number): PipelineStage[] => {
     {
       $match: {
         recommendationCount: { $gt: 0 },
+        // Backward-compatible: old returns missing this field remain visible.
+        galleryVisible: { $ne: false },
       },
     },
     {

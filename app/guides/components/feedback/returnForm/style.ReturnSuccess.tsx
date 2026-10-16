@@ -85,6 +85,21 @@ export const ReturnedActions = styled.div`
   margin-top: 0.25rem;
 `;
 
+export const ToggleRow = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--primary-black-100);
+  cursor: pointer;
+`;
+
+export const ToggleInput = styled.input`
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary-black-100);
+`;
+
 // ── Guest ─────────────────────────────────────────────────────────────────
 
 export const GuestPanel = styled.div`

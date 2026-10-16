@@ -11,6 +11,7 @@ const returnSchema = new Schema({
   projectUrl: { type: Schema.Types.String, required: true },
   liveVersion: { type: Schema.Types.String, required: true },
   pictureUrl: { type: Schema.Types.String, required: false },
+  galleryVisible: { type: Schema.Types.Boolean, required: true, default: true },
   projectName: { type: Schema.Types.String, required: true },
   comment: { type: Schema.Types.String, required: true },
   owner: { type: Schema.Types.ObjectId, required: true, ref: "User", index: true },

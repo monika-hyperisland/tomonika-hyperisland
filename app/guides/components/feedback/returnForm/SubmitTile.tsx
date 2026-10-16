@@ -1,19 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "globalStyles/buttons/default/style";
+import { Form } from "globalStyles/globalStyles";
 import { UnstyledLink } from "globalStyles/globalStyles";
 import { ReturnStatus } from "types/guideTypes";
 import type { ReturnSummary } from "serverActions/getReturnSummary";
 import { returnFieldsFor } from "utils/returnFields";
 import { getDiscipline } from "utils/guideTaxonomy";
 import { InlineReturnForm } from "./ReturnForm";
+import { updateReturnSubmission } from "serverActions/updateReturnSubmission";
+import { Input } from "UIcomponents/input/Input";
+import { ImageUploadField } from "UIcomponents/imageUpload/ImageUploadField";
 import {
+  FormIntro,
   ReturnedPanel,
   ReturnedHeading,
   ReturnedNote,
   ReturnedProject,
   ReturnedActions,
+  ToggleRow,
+  ToggleInput,
   GuestPanel,
   SuccessText,
 } from "./style.ReturnSuccess";
@@ -42,15 +50,26 @@ export const SubmitTile = ({
   summary: ReturnSummary | null;
 }) => {
   const [showForm, setShowForm] = useState(summary === null);
+  const [showEditForm, setShowEditForm] = useState(false);
   const guideId = guide._id.toString();
   const discipline = getDiscipline(guide);
 
-  if (summary && !showForm) {
+  if (summary && !showForm && !showEditForm) {
     return (
       <Returned
         guide={guide}
         summary={summary}
         onReturnAgain={() => setShowForm(true)}
+        onEdit={() => setShowEditForm(true)}
+      />
+    );
+  }
+
+  if (summary && showEditForm) {
+    return (
+      <EditReturnedSubmission
+        summary={summary}
+        onDone={() => setShowEditForm(false)}
       />
     );
   }
@@ -113,10 +132,12 @@ const Returned = ({
   guide,
   summary,
   onReturnAgain,
+  onEdit,
 }: {
   guide: GuideBits;
   summary: ReturnSummary;
   onReturnAgain: () => void;
+  onEdit: () => void;
 }) => {
   const fields = returnFieldsFor(guide);
   const failed = summary.status === ReturnStatus.FAILED;
@@ -149,6 +170,9 @@ const Returned = ({
         </dd>
       </ReturnedProject>
       <ReturnedActions>
+        <Button type="button" $styletype="default" onClick={onEdit}>
+          EDIT
+        </Button>
         <Button
           type="button"
           $styletype={failed ? "default" : "outlined"}
@@ -162,6 +186,128 @@ const Returned = ({
           </Button>
         </UnstyledLink>
       </ReturnedActions>
+    </ReturnedPanel>
+  );
+};
+
+const EditReturnedSubmission = ({
+  summary,
+  onDone,
+}: {
+  summary: ReturnSummary;
+  onDone: () => void;
+}) => {
+  const router = useRouter();
+  const [state, formAction, isPending] = useActionState(
+    updateReturnSubmission,
+    undefined
+  );
+  const [projectName, setProjectName] = useState(summary.projectName);
+  const [comment, setComment] = useState(summary.comment);
+  const [pictureUrl, setPictureUrl] = useState(summary.pictureUrl ?? "");
+  const [galleryVisible, setGalleryVisible] = useState(summary.galleryVisible);
+
+  useEffect(() => {
+    if (state?.success) {
+      router.refresh();
+      onDone();
+    }
+  }, [state?.success, router, onDone]);
+
+  return (
+    <ReturnedPanel aria-live="polite">
+      <ReturnedHeading $tone="wait">Edit return</ReturnedHeading>
+      <FormIntro>
+        Update your project title, description, or picture without creating a
+        new return.
+      </FormIntro>
+
+      <Form
+        onSubmit={(event) => {
+          event.preventDefault();
+          startTransition(() => {
+            formAction({
+              returnId: summary.id,
+              projectName,
+              comment,
+              pictureUrl,
+              galleryVisible,
+            });
+          });
+        }}
+        style={{ display: "flex", flexDirection: "column", gap: "0.85rem", maxWidth: 520 }}
+      >
+        <Input
+          id="edit-projectName"
+          type="text"
+          name="projectName"
+          label="Project title"
+          value={projectName}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setProjectName(event.target.value)
+          }
+          required
+          disabled={isPending}
+          error={state && !state.success ? state.errors?.projectName?.[0] : undefined}
+        />
+
+        <Input
+          id="edit-comment"
+          type="textarea"
+          name="comment"
+          label="Short project description"
+          value={comment}
+          onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setComment(event.target.value)
+          }
+          required
+          disabled={isPending}
+          error={state && !state.success ? state.errors?.comment?.[0] : undefined}
+        />
+
+        <ImageUploadField
+          id="edit-pictureUrl"
+          prefix="return-picture"
+          label="Image that suits your project (optional)"
+          value={pictureUrl}
+          onChange={setPictureUrl}
+          disabled={isPending}
+        />
+
+        <ToggleRow htmlFor="edit-galleryVisible">
+          <ToggleInput
+            id="edit-galleryVisible"
+            type="checkbox"
+            checked={galleryVisible}
+            onChange={(event) => setGalleryVisible(event.target.checked)}
+            disabled={isPending}
+          />
+          Show this project on the gallery page
+        </ToggleRow>
+
+        {state && !state.success && state.errors?.pictureUrl?.[0] && (
+          <ReturnedNote style={{ color: "var(--error-failure-100)" }}>
+            {state.errors.pictureUrl[0]}
+          </ReturnedNote>
+        )}
+
+        {state?.message && (
+          <ReturnedNote
+            style={!state.success ? { color: "var(--error-failure-100)" } : undefined}
+          >
+            {state.message}
+          </ReturnedNote>
+        )}
+
+        <ReturnedActions>
+          <Button type="button" $styletype="outlined" onClick={onDone} disabled={isPending}>
+            CANCEL
+          </Button>
+          <Button type="submit" $styletype="default" disabled={isPending}>
+            {isPending ? "SAVING…" : "SAVE CHANGES"}
+          </Button>
+        </ReturnedActions>
+      </Form>
     </ReturnedPanel>
   );
 };

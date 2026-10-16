@@ -14,8 +14,11 @@ import { ReturnStatus } from "types/guideTypes";
 export type ReturnSummary = {
   id: string;
   projectName: string;
+  comment: string;
   projectUrl: string;
   liveVersion: string;
+  pictureUrl: string | null;
+  galleryVisible: boolean;
   /** ISO date of the latest return. */
   returnedAt: string;
   status: ReturnStatus;
@@ -53,8 +56,11 @@ export async function getReturnSummary(
     return {
       id: String(latest._id),
       projectName: latest.projectName,
+      comment: latest.comment,
       projectUrl: latest.projectUrl,
       liveVersion: latest.liveVersion,
+      pictureUrl: latest.pictureUrl ?? null,
+      galleryVisible: latest.galleryVisible !== false,
       returnedAt: isoDate(latest.createdAt),
       status: calculateReturnStatus(returns, reviews),
       reviewsReceived: reviews.length,
