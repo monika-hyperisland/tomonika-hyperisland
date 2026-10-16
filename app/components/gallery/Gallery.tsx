@@ -19,6 +19,7 @@ import {
 import { useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { sortGalleryItems, type GallerySortOrder } from "./sortGalleryItems";
+import { getModuleNumber } from "./moduleNumber";
 
 interface GalleryProps {
   items: GalleryItemType[];
@@ -71,8 +72,13 @@ const Gallery = ({ items, userId, showControls = false }: GalleryProps) => {
     );
   }
 
-  const moduleOptions = [...new Map(items.map((item) => [item.module.number, item.module.title])).entries()]
-    .sort((a, b) => a[0] - b[0]);
+  // Keyed by title: real guides have no module.number, so a number key would
+  // merge every module into one option. The title already carries the number.
+  const moduleOptions = [...new Set(items.map((item) => item.module.title))]
+    .sort((a, b) =>
+      (getModuleNumber({ title: a }) ?? Infinity) - (getModuleNumber({ title: b }) ?? Infinity) ||
+      a.localeCompare(b)
+    );
 
   const yearOptions = [...new Set(items.map((item) => new Date(item.createdAt).getFullYear()))]
     .filter((year) => Number.isFinite(year))
@@ -92,7 +98,7 @@ const Gallery = ({ items, userId, showControls = false }: GalleryProps) => {
 
         const matchesModule =
           selectedModule.length === 0 ||
-          modules.has(String(item.module.number));
+          modules.has(item.module.title);
 
         const matchesCategory =
           selectedCategory.length === 0 ||
@@ -124,7 +130,7 @@ const Gallery = ({ items, userId, showControls = false }: GalleryProps) => {
 
       <FilterControls data-gallery-layout="filters" data-clear-visible={hasActiveControls}>
         <GalleryMultiFilter label="Filter by module" allLabel="All modules"
-          options={moduleOptions.map(([number, title]) => ({ value: String(number), label: "Module " + number + ": " + title }))}
+          options={moduleOptions.map((title) => ({ value: title, label: title }))}
           selected={selectedModule} onChange={setSelectedModule} />
         <GalleryMultiFilter label="Filter by category" allLabel="All categories"
           options={[{value: "design", label: "Design"}, {value: "web", label: "Web"}, {value: "other", label: "Other"}]}

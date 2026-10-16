@@ -26,6 +26,7 @@ import {
   IframePreviewContainer,
   FigmaPreviewContainer,
 } from "./styles";
+import { getModuleNumber } from "./moduleNumber";
 
 interface GalleryItemProps {
   item: GalleryItemType;
@@ -167,6 +168,7 @@ const MAX_VISIBLE_TOPICS = 2;
 
 const GalleryItem = ({ item }: GalleryItemProps) => {
   const hasCustomImage = item.returnImage || item.returnGif;
+  const moduleNumber = getModuleNumber(item.module);
   const figmaFileKey = item.returnUrl ? getFigmaFileKey(item.returnUrl) : null;
   const showFigmaPreview = !hasCustomImage && figmaFileKey;
   const showIframePreview = !hasCustomImage && !figmaFileKey && item.returnUrl && isWebsiteUrl(item.returnUrl);
@@ -182,8 +184,8 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
   return (
     <GalleryItemContainer>
       <GalleryMedia>
-        <ModuleBadge $module={item.module.number}>
-          Module {item.module.number ?? item.module.title}
+        <ModuleBadge $module={moduleNumber}>
+          Module {moduleNumber ?? item.module.title}
         </ModuleBadge>
         {hasCustomImage && (
           <GalleryItemImage>
@@ -218,7 +220,7 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
         )}
 
         {!hasPreview && (
-          <GalleryItemPlaceholder $module={item.module.number} aria-hidden="true">
+          <GalleryItemPlaceholder $module={moduleNumber} aria-hidden="true">
             {isDesignProject ? <FiPenTool size={56} /> : <FiMonitor size={56} />}
           </GalleryItemPlaceholder>
         )}

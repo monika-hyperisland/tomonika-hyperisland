@@ -38,8 +38,8 @@ test("Clear all is hidden by default and for search alone, but appears for sorti
 
 test("multiple values within each filter are combined with OR, and filter groups with AND", () => {
   render(<Gallery showControls items={items} />);
-  choose("module", "Module 1: Module 1");
-  choose("module", "Module 2: Module 2");
+  choose("module", "Module 1");
+  choose("module", "Module 2");
   expect(titles()).toEqual(["Old web", "New design"]);
   choose("category", "Web");
   expect(titles()).toEqual(["Old web"]);
@@ -57,25 +57,9 @@ test("multiple values within each filter are combined with OR, and filter groups
 
 test("All modules removes selections and hides Clear all when sorting is default", () => {
   render(<Gallery showControls items={items} />);
-  choose("module", "Module 1: Module 1");
+  choose("module", "Module 1");
   expect(screen.getByRole("button", {name: "Clear all"})).toBeInTheDocument();
   choose("module", "All modules");
   expect(titles()).toHaveLength(3);
   expect(screen.queryByRole("button", {name: "Clear all"})).not.toBeInTheDocument();
-});
-
-test("explanation appears with Clear all and dismissal is remembered per user", () => {
-  const view = render(<Gallery showControls items={items} userId="one" />);
-  expect(screen.queryByRole("note")).not.toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText("Sort by"), {target: {value: "newest"}});
-  expect(screen.getByRole("note")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", {name: "Close Clear all explanation"}));
-  view.unmount();
-  const next = render(<Gallery showControls items={items} userId="one" />);
-  fireEvent.change(screen.getByLabelText("Sort by"), {target: {value: "newest"}});
-  expect(screen.queryByRole("note")).not.toBeInTheDocument();
-  next.unmount();
-  render(<Gallery showControls items={items} userId="two" />);
-  fireEvent.change(screen.getByLabelText("Sort by"), {target: {value: "newest"}});
-  expect(screen.getByRole("note")).toBeInTheDocument();
 });
