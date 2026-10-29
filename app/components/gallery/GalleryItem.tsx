@@ -30,6 +30,7 @@ import { getModuleNumber } from "./moduleNumber";
 
 interface GalleryItemProps {
   item: GalleryItemType;
+  compactCards?: boolean;
 }
 
 // Extract Figma file key from URL
@@ -121,7 +122,7 @@ const PlatformIcon = ({ label }: { label: string }) => {
   return null;
 };
 
-const GalleryLinks = ({ item }: GalleryItemProps) => {
+const GalleryLinks = ({ item, compactCards = false }: GalleryItemProps) => {
   if (!item.liveVersion && !item.projectUrl) return null;
   const hasBothLinks = Boolean(item.liveVersion && item.projectUrl);
   const liveVersionLabel = item.liveVersion
@@ -132,7 +133,7 @@ const GalleryLinks = ({ item }: GalleryItemProps) => {
     : null;
 
   return (
-    <GalleryActions $multiple={hasBothLinks}>
+    <GalleryActions $multiple={hasBothLinks} $compact={compactCards}>
       {item.liveVersion && (
         <GalleryActionLink
           href={item.liveVersion}
@@ -140,6 +141,7 @@ const GalleryLinks = ({ item }: GalleryItemProps) => {
           rel="noopener noreferrer"
           $primary
           $multiple={hasBothLinks}
+          $compact={compactCards}
         >
           <PlatformIcon label={liveVersionLabel ?? ""} />
           {liveVersionLabel}
@@ -155,6 +157,7 @@ const GalleryLinks = ({ item }: GalleryItemProps) => {
           rel="noopener noreferrer"
           $primary={false}
           $multiple={hasBothLinks}
+          $compact={compactCards}
         >
           <PlatformIcon label={projectUrlLabel ?? ""} />
           {projectUrlLabel}
@@ -166,7 +169,7 @@ const GalleryLinks = ({ item }: GalleryItemProps) => {
 
 const MAX_VISIBLE_TOPICS = 2;
 
-const GalleryItem = ({ item }: GalleryItemProps) => {
+const GalleryItem = ({ item, compactCards = false }: GalleryItemProps) => {
   const hasCustomImage = item.returnImage || item.returnGif;
   const moduleNumber = getModuleNumber(item.module);
   const figmaFileKey = item.returnUrl ? getFigmaFileKey(item.returnUrl) : null;
@@ -188,7 +191,7 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
           Module {moduleNumber ?? item.module.title}
         </ModuleBadge>
         {hasCustomImage && (
-          <GalleryItemImage>
+          <GalleryItemImage $compact={compactCards}>
             <img
               src={item.returnGif || item.returnImage || ""}
               alt={`${item.studentName}'s project`}
@@ -198,7 +201,7 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
         )}
 
         {showFigmaPreview && !figmaFailed && (
-          <FigmaPreviewContainer>
+          <FigmaPreviewContainer $compact={compactCards}>
             <img
               src={getFigmaThumbnailUrl(figmaFileKey)}
               alt={`${item.studentName}'s Figma design`}
@@ -209,7 +212,7 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
         )}
 
         {showIframePreview && (
-          <IframePreviewContainer>
+          <IframePreviewContainer $compact={compactCards}>
             <iframe
               src={item.returnUrl!}
               title={`${item.studentName}'s project preview`}
@@ -220,21 +223,27 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
         )}
 
         {!hasPreview && (
-          <GalleryItemPlaceholder $module={moduleNumber} aria-hidden="true">
-            {isDesignProject ? <FiPenTool size={56} /> : <FiMonitor size={56} />}
+          <GalleryItemPlaceholder
+            $module={moduleNumber}
+            $compact={compactCards}
+            aria-hidden="true"
+          >
+            {isDesignProject ? <FiPenTool size={compactCards ? 40 : 56} /> : <FiMonitor size={compactCards ? 40 : 56} />}
           </GalleryItemPlaceholder>
         )}
 
       </GalleryMedia>
 
 
-      <GalleryItemContent>
+      <GalleryItemContent $compact={compactCards}>
         <GalleryItemHeader>
           <div>
             <GalleryItemTitle>{item.title}</GalleryItemTitle>
-            <GalleryItemStudent>by {item.studentName}</GalleryItemStudent>
+            {!compactCards && (
+              <GalleryItemStudent>by {item.studentName}</GalleryItemStudent>
+            )}
           </div>
-          {item.recommendationCount > 0 && (
+          {!compactCards && item.recommendationCount > 0 && (
             <RecommendationBadge title="Recommended by classmates in peer review">
               <FaStar aria-hidden="true" /> {item.recommendationCount}
             </RecommendationBadge>
@@ -246,7 +255,7 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
             : item.description
           }
         </GalleryItemDescription>
-        {visibleTopics.length > 0 && (
+        {!compactCards && visibleTopics.length > 0 && (
           <GalleryTopicTags aria-label="Guide topics">
             {visibleTopics.map((topic) => (
               <GalleryTopicTag key={topic}>#{topic}</GalleryTopicTag>
@@ -266,7 +275,7 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
             )}
           </GalleryTopicTags>
         )}
-        <GalleryLinks item={item} />
+        <GalleryLinks item={item} compactCards={compactCards} />
       </GalleryItemContent>
     </GalleryItemContainer>
   );

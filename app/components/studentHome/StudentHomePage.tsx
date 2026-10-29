@@ -55,6 +55,8 @@ import { extractModuleNumber } from "utils/moduleUtils";
 import type { GroupProjectListItem } from "types/groupTypes";
 import type { GalleryItem as GalleryItemType } from "app/serverActions/getGallery";
 import Gallery from "app/components/gallery/Gallery";
+import Image from "next/image";
+import docIcon from "../../assets/icons/doc.svg";
 import { GroupWorkWidget, groupWorkItems } from "./GroupWorkWidget";
 import Modal from "UIcomponents/modal/modal";
 import { LoadingSpinner } from "UIcomponents/states/States";
@@ -464,13 +466,14 @@ export const StudentHomePage = ({
 
           <Section>
             <WidgetHeading
-              title="My Projects"
+              title="My submitted Projects"
               accent="violet"
-              icon={<ProgressIcon />}
+              icon={<Image src={docIcon} alt="" width={16} height={20} />}
               help="Projects you have submitted for your guides."
             />
             <Gallery
               items={submittedProjects}
+              compactCards
               emptyTitle="No projects submitted yet"
               emptyDescription="Projects you submit through a guide will appear here."
               defaultSortOrder="newest"

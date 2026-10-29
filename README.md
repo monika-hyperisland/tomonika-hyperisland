@@ -54,6 +54,8 @@ Create `.env.local` in the project root:
 MONGODB_CONNECTION=mongodb://127.0.0.1:27017/vefskolinn_dev
 AUTH_SECRET=replace-with-a-generated-secret
 NEXTAUTH_URL=http://localhost:3000
+# Optional: required for project and team image uploads
+BLOB_READ_WRITE_TOKEN=your-vercel-blob-read-write-token
 ```
 
 Generate a value for `AUTH_SECRET` with:
@@ -82,7 +84,7 @@ Configure these only when working on the corresponding feature:
 | --- | --- |
 | **Zoom recordings** | `ZOOM_ACCOUNT_ID`, `ZOOM_CLIENT_ID`, and `ZOOM_CLIENT_SECRET` for the configured account's server-to-server OAuth app. |
 | **Canvas / LTI** | Start with [.env.lti.example](.env.lti.example) and the [LTI setup guide](documentation/LTI_SETUP.md). Existing LTI routes also read `NEXTAUTH_SECRET`; keep it aligned with `AUTH_SECRET`. |
-| **Vercel Blob** | Configure a Blob store for public showcase image uploads. See the [upload route](app/api/blob/upload/route.ts). |
+| **Vercel Blob** | Connect a Blob store and set its `BLOB_READ_WRITE_TOKEN` in the local environment and in each Vercel deployment environment that needs image uploads. See the [upload route](app/api/blob/upload/route.ts). |
 | **Google Drive** | Currently a shared-folder link in [GoogleDriveButton](app/LMS/resources/components/googleDriveButton/googleDriveButton.tsx). Automatic recording uploads are not implemented. |
 
 Activity-log evidence images use a separate, authenticated storage path; they are not public showcase uploads.

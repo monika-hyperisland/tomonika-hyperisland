@@ -1,5 +1,5 @@
 "use client";
-import { upload } from "@vercel/blob/client";
+import { put, type HandleUploadBody } from "@vercel/blob/client";
 import {
   IMAGE_JPEG_QUALITY,
   IMAGE_MAX_DIMENSION,
@@ -78,15 +78,37 @@ export async function processImageFile(
   }
 
   try {
-    const result = await upload(`${prefix}/${Date.now()}.jpg`, compressed, {
+    const pathname = `${prefix}/${Date.now()}.jpg`;
+    const tokenResponse = await fetch(UPLOAD_ENDPOINT, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        type: "blob.generate-client-token",
+        payload: { pathname, clientPayload: null, multipart: false },
+      } satisfies HandleUploadBody),
+    });
+    if (!tokenResponse.ok) {
+      const tokenError: { error?: string } = await tokenResponse
+        .json()
+        .catch(() => ({}));
+      throw new Error(
+        tokenError.error ||
+          `Could not start image upload (HTTP ${tokenResponse.status})`,
+      );
+    }
+
+    const tokenResult: { clientToken?: string } = await tokenResponse.json();
+    if (!tokenResult.clientToken) {
+      throw new Error("The upload service did not issue an upload token");
+    }
+
+    const result = await put(pathname, compressed, {
       access: "public",
       contentType: "image/jpeg",
-      handleUploadUrl: UPLOAD_ENDPOINT,
+      token: tokenResult.clientToken,
     });
     return { ok: true, url: result.url };
   } catch (error) {
-    // Most likely causes: the session expired, or the Blob store is not
-    // configured / over its limit. Either way the student can retry.
     return {
       ok: false,
       error:

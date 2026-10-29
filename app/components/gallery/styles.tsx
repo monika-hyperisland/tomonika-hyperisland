@@ -19,9 +19,9 @@ export const GalleryItemContainer = styled.div`
   }
 `;
 
-export const GalleryItemImage = styled.div`
+export const GalleryItemImage = styled.div<{ $compact?: boolean }>`
   width: 100%;
-  height: 200px;
+  height: ${({ $compact }) => ($compact ? "128px" : "200px")};
   overflow: hidden;
   background: var(--primary-black-5);
   display: flex;
@@ -35,15 +35,15 @@ export const GalleryItemImage = styled.div`
   }
 
   @media (min-width: 768px) {
-    height: 240px;
+    height: ${({ $compact }) => ($compact ? "144px" : "240px")};
   }
 `;
 
-export const GalleryItemContent = styled.div`
-  padding: 20px;
+export const GalleryItemContent = styled.div<{ $compact?: boolean }>`
+  padding: ${({ $compact }) => ($compact ? "10px" : "20px")};
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: ${({ $compact }) => ($compact ? "3px" : "8px")};
   flex: 1;
 `;
 
@@ -144,8 +144,12 @@ export const GalleryTopicMore = styled(GalleryTopicTag)`
   }
 `;
 
-export const GalleryActions = styled.div<{ $multiple: boolean }>`
+export const GalleryActions = styled.div<{
+  $multiple: boolean;
+  $compact?: boolean;
+}>`
   display: flex;
+  flex-direction: ${({ $compact }) => ($compact ? "column" : "row")};
   flex-wrap: wrap;
   gap: 8px;
   justify-content: space-between;
@@ -161,12 +165,16 @@ export const GalleryActionArrow = styled.span`
 export const GalleryActionLink = styled.a<{
   $primary: boolean;
   $multiple: boolean;
+  $compact?: boolean;
 }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: ${({ $multiple }) => ($multiple ? "1 1 0" : "0 1 auto")};
+  flex: ${({ $multiple, $compact }) =>
+    $compact ? "0 1 auto" : $multiple ? "1 1 0" : "0 1 auto"};
   min-width: 0;
+  width: ${({ $compact }) => ($compact ? "100%" : "auto")};
+  box-sizing: border-box;
   min-height: 44px;
   padding: 10px 20px;
 
@@ -187,6 +195,7 @@ export const GalleryActionLink = styled.a<{
   font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1.2;
+  white-space: nowrap;
   text-decoration: none;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
@@ -214,10 +223,13 @@ export const GalleryActionLink = styled.a<{
  * on a wide screen instead of leaving the right-hand side empty. The track
  * minimum is what decides the count; no breakpoints to keep in sync.
  */
-export const GalleryGrid = styled.div`
+export const GalleryGrid = styled.div<{ $compact?: boolean }>`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: ${({ $compact }) =>
+    $compact
+      ? "repeat(auto-fill, minmax(min(240px, 100%), 1fr))"
+      : "repeat(auto-fill, minmax(280px, 1fr))"};
+  gap: ${({ $compact }) => ($compact ? "13px" : "24px")};
   width: 100%;
   margin: 0;
 `;
@@ -345,10 +357,10 @@ export const GalleryEmpty = styled.div`
 `;
 
 // Iframe preview for live websites (zoomed out view)
-export const IframePreviewContainer = styled.div`
+export const IframePreviewContainer = styled.div<{ $compact?: boolean }>`
   position: relative;
   width: 100%;
-  height: 200px;
+  height: ${({ $compact }) => ($compact ? "128px" : "200px")};
   overflow: hidden;
   background: var(--primary-black-5);
 
@@ -362,15 +374,15 @@ export const IframePreviewContainer = styled.div`
   }
 
   @media (min-width: 768px) {
-    height: 240px;
+    height: ${({ $compact }) => ($compact ? "144px" : "240px")};
   }
 `;
 
 // Figma thumbnail preview
-export const FigmaPreviewContainer = styled.div`
+export const FigmaPreviewContainer = styled.div<{ $compact?: boolean }>`
   position: relative;
   width: 100%;
-  height: 200px;
+  height: ${({ $compact }) => ($compact ? "128px" : "200px")};
   overflow: hidden;
   background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
   display: flex;
@@ -384,7 +396,7 @@ export const FigmaPreviewContainer = styled.div`
   }
 
   @media (min-width: 768px) {
-    height: 240px;
+    height: ${({ $compact }) => ($compact ? "144px" : "240px")};
   }
 `;
 

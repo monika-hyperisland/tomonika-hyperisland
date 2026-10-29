@@ -15,7 +15,7 @@ const sampleItems = [
     returnUrl: "https://example.com/project",
     projectUrl: null,
     liveVersion: "https://example.com/project",
-    topics: [],
+    topics: ["html", "css"],
     createdAt: "2024-01-01T00:00:00.000Z",
   },
 ];
@@ -33,5 +33,23 @@ describe("Gallery controls", () => {
 
     expect(screen.getByPlaceholderText("Search by project, student or module")).toBeInTheDocument();
     expect(screen.getByLabelText("Filter by module")).toBeInTheDocument();
+  });
+
+  it("renders compact cards without student, recommendation, or topic details", () => {
+    render(<Gallery items={sampleItems} compactCards />);
+
+    expect(screen.getByText("Moon Landing")).toBeInTheDocument();
+    expect(screen.queryByText("by Anna Student")).not.toBeInTheDocument();
+    expect(screen.queryByTitle("Recommended by classmates in peer review")).not.toBeInTheDocument();
+    expect(screen.queryByText("#html")).not.toBeInTheDocument();
+    expect(screen.queryByText("#css")).not.toBeInTheDocument();
+  });
+
+  it("keeps the standard card details when compact cards are disabled", () => {
+    render(<Gallery items={sampleItems} />);
+
+    expect(screen.getByText("by Anna Student")).toBeInTheDocument();
+    expect(screen.getByTitle("Recommended by classmates in peer review")).toBeInTheDocument();
+    expect(screen.getByText("#html")).toBeInTheDocument();
   });
 });

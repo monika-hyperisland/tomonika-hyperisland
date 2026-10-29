@@ -24,6 +24,8 @@ import { getModuleNumber } from "./moduleNumber";
 interface GalleryProps {
   items: GalleryItemType[];
   showControls?: boolean;
+  compactCards?: boolean;
+  userId?: string;
   emptyTitle?: string;
   emptyDescription?: string;
   defaultSortOrder?: GallerySortOrder;
@@ -61,15 +63,16 @@ const getCategory = (item: GalleryItemType): CategoryFilter => {
 const Gallery = ({
   items,
   showControls = false,
+  compactCards = false,
   emptyTitle = "Gallery Coming Soon",
   emptyDescription = "Featured student projects will be displayed here once they are recommended by peers.",
   defaultSortOrder = "recommended",
 }: GalleryProps) => {
   const [query, setQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState<GallerySortOrder>("recommended");
-  const [selectedModule, setSelectedModule] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
-  const [selectedYear, setSelectedYear] = useState("all");
+  const [sortOrder, setSortOrder] = useState<GallerySortOrder>(defaultSortOrder);
+  const [selectedModule, setSelectedModule] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState<string[]>([]);
 
   if (!items || items.length === 0) {
     return (
@@ -182,9 +185,13 @@ const Gallery = ({
           <p>No projects match your current filters.</p>
         </GalleryEmpty>
       ) : (
-        <GalleryGrid data-gallery-layout="cards">
+        <GalleryGrid $compact={compactCards} data-gallery-layout="cards">
           {sortGalleryItems(filteredItems, sortOrder).map((item) => (
-            <GalleryItem key={item.returnId} item={item} />
+            <GalleryItem
+              key={item.returnId}
+              item={item}
+              compactCards={compactCards}
+            />
           ))}
         </GalleryGrid>
       )}

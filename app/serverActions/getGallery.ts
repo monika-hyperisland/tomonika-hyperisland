@@ -5,6 +5,8 @@ import { connectToDatabase } from "./mongoose-connector";
 import { Return } from "models/return";
 import { Vote } from "models/review";
 import { ModuleType } from "models/guide";
+import { auth } from "../../auth";
+import { after } from "next/server";
 
 type ModuleSummary = Pick<ModuleType, "title" | "number">;
 
@@ -40,8 +42,17 @@ export type GalleryItem = {
   createdAt: string;
 };
 
-const buildPipeline = (limit?: number): PipelineStage[] => {
+const buildPipeline = (
+  options: {
+    limit?: number;
+    ownerId?: Types.ObjectId;
+    recommendedOnly?: boolean;
+  } = {},
+): PipelineStage[] => {
   const pipeline: PipelineStage[] = [
+    ...(options.ownerId
+      ? [{ $match: { owner: options.ownerId } } as PipelineStage]
+      : []),
     {
       $lookup: {
         from: "reviews",
@@ -63,11 +74,9 @@ const buildPipeline = (limit?: number): PipelineStage[] => {
         },
       },
     },
-    {
-      $match: {
-        recommendationCount: { $gt: 0 },
-      },
-    },
+    ...(options.recommendedOnly
+      ? [{ $match: { recommendationCount: { $gt: 0 } } } as PipelineStage]
+      : []),
     {
       $lookup: {
         from: "guides",
@@ -115,8 +124,8 @@ const buildPipeline = (limit?: number): PipelineStage[] => {
     },
   ];
 
-  if (limit) {
-    pipeline.push({ $limit: limit });
+  if (options.limit) {
+    pipeline.push({ $limit: options.limit });
   }
 
   return pipeline;
@@ -180,7 +189,7 @@ export async function getGalleryItems(): Promise<GalleryItem[]> {
       return [];
     }
 
-    const pipeline = buildPipeline(4);
+    const pipeline = buildPipeline({ limit: 4, recommendedOnly: true });
     const results = await Return.aggregate<GalleryAggregateResult>(pipeline);
 
     return results.map(mapAggregateToItem);
@@ -202,7 +211,7 @@ export async function getAllGalleryItems(): Promise<GalleryItem[]> {
       return [];
     }
 
-    const pipeline = buildPipeline();
+    const pipeline = buildPipeline({ recommendedOnly: true });
     const results = await Return.aggregate<GalleryAggregateResult>(pipeline);
 
     return results.map(mapAggregateToItem);
@@ -212,6 +221,41 @@ export async function getAllGalleryItems(): Promise<GalleryItem[]> {
       return [];
     }
     console.error("Failed to fetch all gallery items:", error);
+    return [];
+  }
+}
+
+export async function getMySubmittedProjects(): Promise<GalleryItem[]> {
+  const session = await auth();
+  if (!session?.user?.id || !Types.ObjectId.isValid(session.user.id)) {
+    return [];
+  }
+
+  try {
+    await connectToDatabase();
+    if (mongoose.connection.readyState !== 1) {
+      after(() =>
+        console.warn("MongoDB not connected. Skipping student project fetch."),
+      );
+      return [];
+    }
+
+    const pipeline = buildPipeline({
+      ownerId: new Types.ObjectId(session.user.id),
+    });
+    const results = await Return.aggregate<GalleryAggregateResult>(pipeline);
+
+    return results.map(mapAggregateToItem);
+  } catch (error) {
+    if (error instanceof Error && error.name === "MongoNotConnectedError") {
+      after(() =>
+        console.warn(
+          "MongoDB connection unavailable during student project fetch. Returning empty list.",
+        ),
+      );
+      return [];
+    }
+    console.error("Failed to fetch student projects:", error);
     return [];
   }
 }
