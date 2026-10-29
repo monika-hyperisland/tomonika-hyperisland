@@ -3,6 +3,7 @@ import { StudentHomePage } from "../../components/studentHome/StudentHomePage";
 import { TeacherHomePage } from "../../components/teacherHome/TeacherHomePage";
 import { Module } from "../../../types/guideTypes";
 import { getGuides } from "../../serverActions/getGuides";
+import { getMySubmittedProjects } from "../../serverActions/getGallery";
 import { getGroupProjects } from "../../serverActions/groups/getGroupProjects";
 import { extendGuides, fetchModules } from "../../utils/guideUtils";
 import { safeSerialize } from "../../utils/serialization";
@@ -32,9 +33,10 @@ const Dashboard = async () => {
 
   // Authenticated user - show personalized home page based on role
   try {
-    const [fetchedGuides, groupProjects] = await Promise.all([
+    const [fetchedGuides, groupProjects, submittedProjects] = await Promise.all([
       getGuides(session.user.id).then((guides) => guides || []),
       getGroupProjects(),
+      getMySubmittedProjects(),
     ]);
     const extendedGuides = await extendGuides(fetchedGuides);
 
@@ -58,6 +60,7 @@ const Dashboard = async () => {
         extendedGuides={serializedGuides}
         modules={serializedModules}
         groupProjects={groupProjects}
+        submittedProjects={submittedProjects}
       />
     );
   } catch (error) {

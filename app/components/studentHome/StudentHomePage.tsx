@@ -53,6 +53,8 @@ import { PageTitle, PageSubtitle, TitleBlock } from "globalStyles/pageStyles";
 import { Suspense, lazy, useMemo } from "react";
 import { extractModuleNumber } from "utils/moduleUtils";
 import type { GroupProjectListItem } from "types/groupTypes";
+import type { GalleryItem as GalleryItemType } from "app/serverActions/getGallery";
+import Gallery from "app/components/gallery/Gallery";
 import { GroupWorkWidget, groupWorkItems } from "./GroupWorkWidget";
 import Modal from "UIcomponents/modal/modal";
 import { LoadingSpinner } from "UIcomponents/states/States";
@@ -71,15 +73,18 @@ interface StudentHomePageProps {
   modules: Module[];
   /** The student's group projects, for the "what does it need from me" widget. */
   groupProjects?: GroupProjectListItem[];
+  submittedProjects?: GalleryItemType[];
 }
 
 /** How many upcoming guides the "Continue Learning" widget shows. */
 const NEXT_GUIDES_SHOWN = 3;
+const EMPTY_SUBMITTED_PROJECTS: GalleryItemType[] = [];
 
 export const StudentHomePage = ({
   extendedGuides,
   modules,
   groupProjects = [],
+  submittedProjects = EMPTY_SUBMITTED_PROJECTS,
 }: StudentHomePageProps) => {
   // Organize guides by priority
   const organizedGuides = useMemo(() => {
@@ -456,6 +461,21 @@ export const StudentHomePage = ({
               </GuidesList>
             </Section>
           )}
+
+          <Section>
+            <WidgetHeading
+              title="My Projects"
+              accent="violet"
+              icon={<ProgressIcon />}
+              help="Projects you have submitted for your guides."
+            />
+            <Gallery
+              items={submittedProjects}
+              emptyTitle="No projects submitted yet"
+              emptyDescription="Projects you submit through a guide will appear here."
+              defaultSortOrder="newest"
+            />
+          </Section>
 
           {hasNothingToDo && (
             <EmptyState>

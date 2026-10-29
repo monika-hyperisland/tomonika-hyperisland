@@ -234,9 +234,11 @@ const GalleryItem = ({ item }: GalleryItemProps) => {
             <GalleryItemTitle>{item.title}</GalleryItemTitle>
             <GalleryItemStudent>by {item.studentName}</GalleryItemStudent>
           </div>
-          <RecommendationBadge title="Recommended by classmates in peer review">
-            <FaStar aria-hidden="true" /> {item.recommendationCount}
-          </RecommendationBadge>
+          {item.recommendationCount > 0 && (
+            <RecommendationBadge title="Recommended by classmates in peer review">
+              <FaStar aria-hidden="true" /> {item.recommendationCount}
+            </RecommendationBadge>
+          )}
         </GalleryItemHeader>
         <GalleryItemDescription>
           {item.description.length > 150

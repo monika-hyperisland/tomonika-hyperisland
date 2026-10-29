@@ -24,7 +24,9 @@ import { getModuleNumber } from "./moduleNumber";
 interface GalleryProps {
   items: GalleryItemType[];
   showControls?: boolean;
-  userId?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  defaultSortOrder?: GallerySortOrder;
 }
 
 type CategoryFilter = "all" | "design" | "web" | "other";
@@ -56,18 +58,24 @@ const getCategory = (item: GalleryItemType): CategoryFilter => {
   return "other";
 };
 
-const Gallery = ({ items, userId, showControls = false }: GalleryProps) => {
+const Gallery = ({
+  items,
+  showControls = false,
+  emptyTitle = "Gallery Coming Soon",
+  emptyDescription = "Featured student projects will be displayed here once they are recommended by peers.",
+  defaultSortOrder = "recommended",
+}: GalleryProps) => {
   const [query, setQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<GallerySortOrder>("recommended");
-  const [selectedModule, setSelectedModule] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
-  const [selectedYear, setSelectedYear] = useState<string[]>([]);
+  const [selectedModule, setSelectedModule] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
+  const [selectedYear, setSelectedYear] = useState("all");
 
   if (!items || items.length === 0) {
     return (
       <GalleryEmpty>
-        <h3>Gallery Coming Soon</h3>
-        <p>Featured student projects will be displayed here once they are recommended by peers.</p>
+        <h3>{emptyTitle}</h3>
+        <p>{emptyDescription}</p>
       </GalleryEmpty>
     );
   }
@@ -185,4 +193,3 @@ const Gallery = ({ items, userId, showControls = false }: GalleryProps) => {
 };
 
 export default Gallery;
-

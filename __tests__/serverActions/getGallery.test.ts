@@ -6,6 +6,10 @@ import { getGalleryItems } from "serverActions/getGallery";
 import { Return } from "models/return";
 import { Review, Vote } from "models/review";
 import mongoose from "mongoose";
+import { auth } from "../../auth";
+import { getMySubmittedProjects } from "serverActions/getGallery";
+
+jest.mock("../../auth", () => ({ auth: jest.fn() }));
 
 describe("getGalleryItems", () => {
   beforeAll(async () => {
@@ -132,5 +136,41 @@ describe("getGalleryItems", () => {
     expect(galleryItems[0].returnId).toBe(recommendedReturn._id.toString());
     expect(galleryItems[0].returnGif).toBe(gifUrl);
     expect(galleryItems[0].returnImage).toBeNull();
+  });
+
+  it("returns all submissions belonging only to the signed-in student", async () => {
+    const student = await createDummyUser("user", { name: "My Projects Student" });
+    const otherStudent = await createDummyUser("user", { name: "Other Student" });
+    const guide = await createDummyGuide();
+
+    const ownSubmission = await Return.create({
+      projectUrl: "https://github.com/example/my-project",
+      liveVersion: "https://example.com/my-project",
+      projectName: "My Unrecommended Project",
+      comment: "My submitted project.",
+      owner: student._id,
+      guide: guide._id,
+    });
+    await Return.create({
+      projectUrl: "https://github.com/example/other-project",
+      liveVersion: "https://example.com/other-project",
+      projectName: "Another Student's Project",
+      comment: "Not mine.",
+      owner: otherStudent._id,
+      guide: guide._id,
+    });
+    (auth as jest.Mock).mockResolvedValue({
+      user: { id: student._id.toString(), role: "user" },
+    });
+
+    const projects = await getMySubmittedProjects();
+
+    expect(projects).toHaveLength(1);
+    expect(projects[0]).toMatchObject({
+      returnId: ownSubmission._id.toString(),
+      title: "My Unrecommended Project",
+      recommendationCount: 0,
+      studentName: "My Projects Student",
+    });
   });
 });

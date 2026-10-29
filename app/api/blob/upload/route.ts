@@ -23,12 +23,14 @@ import {
 export async function POST(request: Request): Promise<NextResponse> {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Your session has expired. Please sign in again." },
+      { status: 401 },
+    );
   }
 
-  const body = (await request.json()) as HandleUploadBody;
-
   try {
+    const body = (await request.json()) as HandleUploadBody;
     const result = await handleUpload({
       body,
       request,
@@ -51,6 +53,18 @@ export async function POST(request: Request): Promise<NextResponse> {
     // The message from @vercel/blob can name internals (token scopes, store
     // ids); the browser only needs to know the upload did not go through.
     console.error("Blob upload error:", error);
+    if (
+      error instanceof Error &&
+      error.message.includes("No read-write token found")
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Image uploads are not configured. Connect a Vercel Blob store and set BLOB_READ_WRITE_TOKEN for this environment.",
+        },
+        { status: 503 },
+      );
+    }
     return NextResponse.json({ error: "Upload failed" }, { status: 400 });
   }
 }
